@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "sam-proton-plugin"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1fsgoutluysat"
+s3_prefix = "sam-proton-plugin"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = "ProvisioningRole=\"arn:aws:iam::860967817579:policy/service-role/CodeBuildBasePolicy-testdeleteme-us-east-1\""
+image_repositories = []

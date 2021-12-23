@@ -1,0 +1,11 @@
+{
+    "service": {
+        "name": "my_service"
+    },
+    "service_instance": {
+        "name": "my_instance"
+    },
+    "environment": {
+        "name": "my_env"
+    }
+}
