@@ -1,7 +1,7 @@
 .PHONY: build-RuntimeDependenciesLayer build-lambda-common
 .PHONY: build-StartProvisioningFunction
 
-build-AwsProtonCdkPluginStartProvisioningFunction:
+build-StartProvisioningFunction:
 	$(MAKE) HANDLER=src/handlers/StartProvisioningHandler.ts build-lambda-common
 
 build-lambda-common:

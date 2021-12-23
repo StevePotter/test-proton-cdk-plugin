@@ -14,7 +14,7 @@ Globals:
     Timeout: 100
 
 Resources:
-  AwsProtonCdkPluginStartProvisioningFunction:
+  StartProvisioningFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
@@ -24,7 +24,7 @@ Resources:
       Environment:
         Variables:
           CODE_BUILD_NAME: !Ref AwsProtonCdkPluginCodeBuildProject
-          CODE_BUILD_SOURCE_BUCKET_NAME: !Ref AwsProtonCdkPluginCodeBuildSourceBucket
+          CODE_BUILD_SOURCE_BUCKET_NAME: !Ref CodeBuildSourceBucket
       Tags: 
           AwsProtonPlugin: "CDK"
           AwsProtonPluginFunction: "StartProvisioning"
@@ -41,7 +41,7 @@ Resources:
       CompatibleRuntimes:
         - nodejs14.x
 
-  AwsProtonCdkPluginCodeBuildRole:
+  CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
       Description: Role assumed by CodeBuild for AWS Proton CDK Plugin
@@ -52,6 +52,7 @@ Resources:
           Principal:
             Service: codebuild.amazonaws.com
       Path: /
+      # codebuild gets admin permissions because the build deploys CDK, which can create almost any kind of construct
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
@@ -62,7 +63,7 @@ Resources:
         Type: NO_ARTIFACTS
       Description: AWS Proton CodeBuild Plugin
       TimeoutInMinutes: 60
-      ServiceRole: !Ref 'AwsProtonCdkPluginCodeBuildRole' 
+      ServiceRole: !Ref 'CodeBuildRole' 
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:5.0
@@ -73,7 +74,7 @@ Resources:
           version: 0.2
         
   # Bucket that contains zip files that are used as input to CodeBuild      
-  AwsProtonCdkPluginCodeBuildSourceBucket:
+  CodeBuildSourceBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:

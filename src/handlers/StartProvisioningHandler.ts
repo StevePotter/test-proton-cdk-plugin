@@ -17,13 +17,14 @@ export const StartProvisioningHandler = async (
   event: StartProvisioningInput,
 ): Promise<StartProvisioningOutput> => {
   console.log('Received event', event)
-  const projectName: string = process.env["CODE_BUILD_ID"]!
+  const projectName: string = process.env["CODE_BUILD_NAME"]!
   console.log(`projectName ${projectName}`)
   console.log("env vars")
   console.log(process.env)
 
   console.log("Download")
   const templateArchive = await downloadAndExtract(event.templateSourceUrl)
+  console.log("Downloaded")
   const protonInput = {
     "service": {
         "name": "service_1"
@@ -42,6 +43,9 @@ export const StartProvisioningHandler = async (
   const sourceKey = `${uuidv4()}.zip`
   const sourceBucket: string = process.env["CODE_BUILD_SOURCE_BUCKET_NAME"]!
   const source = createZip(templateArchive) // proton-input.json has been modified
+
+  console.log(`Uploading object ${sourceKey} to bucket ${sourceBucket}`)
+
   const s3Client = new S3()
   await s3Client.putObject({
     Key: sourceKey,
@@ -49,11 +53,12 @@ export const StartProvisioningHandler = async (
     Body: source
   }).promise()
 
-  console.log("Starting build")
+  console.log("Starting build to S3")
   const r = await codeBuildClient.startBuild({
     projectName,
     buildspecOverride: buildSpec,
-    sourceLocationOverride: `${sourceBucket}/${sourceKey}`
+    sourceLocationOverride: `${sourceBucket}/${sourceKey}`,
+    sourceTypeOverride: "S3" 
   }).promise()
   console.log("Build started", r)
   const deploymentId = r.build!.arn!

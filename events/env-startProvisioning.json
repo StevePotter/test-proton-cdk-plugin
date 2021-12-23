@@ -1,6 +1,6 @@
 {
   "StartProvisioningFunction": {
-    "CODE_BUILD_NAME": "sam-proton-plugin",
-    "CODE_BUILD_SOURCE_BUCKET_NAME": "	sam-proton-plugin-compiledtemplatebucket-1t51p9alel8t0"
+    "CODE_BUILD_NAME": "AwsProtonCdkPluginCodeBuild-bEtvprLDmRMK",
+    "CODE_BUILD_SOURCE_BUCKET_NAME": "sam-proton-plugin-codebuildsourcebucket-t8qat4vqiax"
   }
 }
