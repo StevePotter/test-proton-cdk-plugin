@@ -4,17 +4,19 @@
   "description": "proton-cdk-plugin-2",
   "private": true,
   "dependencies": {
-    "@types/adm-zip": "^0.4.34",
     "adm-zip": "^0.5.9",
     "aws-sdk": "^2.1048.0",
     "eta": "^1.12.3",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.4.34",
     "@tsconfig/node14": "^1.0.1",
     "@types/aws-lambda": "^8.10.88",
     "@types/jest": "^27.0.3",
     "@types/node": "^17.0.4",
+    "@types/uuid": "^8.3.3",
     "jest": "^27.4.5",
     "npm-check-updates": "^12.0.5",
     "sync-glob": "^1.4.0",
@@ -23,9 +25,11 @@
     "typescript": "^4.5.4"
   },
   "scripts": {
+    "check-updates": "npm-check-updates",
     "build": "node_modules/typescript/bin/tsc",
     "watch": "node_modules/typescript/bin/tsc -w --preserveWatchOutput",
     "build-all": "node_modules/typescript/bin/tsc && sam build",
+    "build-deploy": "node_modules/typescript/bin/tsc && sam build && sam deploy",
     "sync-sam": "sync-glob --watch 'dist/**' '.aws-sam/build/StartProvisioningFunction/dist'",
     "test": "jest",
     "copy-build-spec": "aws s3 cp test-data/buildSpec.yaml s3://stevpot-arrow-testing/buildSpec.yaml",

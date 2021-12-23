@@ -1,7 +1,7 @@
 .PHONY: build-RuntimeDependenciesLayer build-lambda-common
 .PHONY: build-StartProvisioningFunction
 
-build-StartProvisioningFunction:
+build-AwsProtonCdkPluginStartProvisioningFunction:
 	$(MAKE) HANDLER=src/handlers/StartProvisioningHandler.ts build-lambda-common
 
 build-lambda-common:
@@ -11,7 +11,7 @@ build-lambda-common:
 	npm run build -- --build tsconfig-only-handler.json
 	cp -r dist "$(ARTIFACTS_DIR)/"
 
-build-RuntimeDependenciesLayer:
+build-AwsProtonCdkPluginRuntimeDependenciesLayer:
 	mkdir -p "$(ARTIFACTS_DIR)/nodejs"
 	cp package.json package-lock.json "$(ARTIFACTS_DIR)/nodejs/"
 	npm install --production --prefix "$(ARTIFACTS_DIR)/nodejs/"

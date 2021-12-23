@@ -6,8 +6,9 @@ import {
 import { AWSError, CodeBuild, S3 } from 'aws-sdk';
 import { StartProvisioningInput } from './StartProvisioningInput'
 import { StartProvisioningOutput } from './StartProvisioningOutput'
-import { downloadAndExtract } from './util'
+import { createZip, downloadAndExtract } from './util'
 import Eta from 'eta'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * A simple example includes a HTTP get method.
@@ -38,11 +39,21 @@ export const StartProvisioningHandler = async (
   const buildSpec = templateArchive["buildSpec.yaml"].toString("utf-8")
   const codeBuildClient = new CodeBuild()
 
+  const sourceKey = `${uuidv4()}.zip`
+  const sourceBucket: string = process.env["CODE_BUILD_SOURCE_BUCKET_NAME"]!
+  const source = createZip(templateArchive) // proton-input.json has been modified
+  const s3Client = new S3()
+  await s3Client.putObject({
+    Key: sourceKey,
+    Bucket: sourceBucket,
+    Body: source
+  }).promise()
+
   console.log("Starting build")
   const r = await codeBuildClient.startBuild({
     projectName,
     buildspecOverride: buildSpec,
-    sourceLocationOverride: "stevpot-arrow-testing/cdk-template.zip"
+    sourceLocationOverride: `${sourceBucket}/${sourceKey}`
   }).promise()
   console.log("Build started", r)
   const deploymentId = r.build!.arn!

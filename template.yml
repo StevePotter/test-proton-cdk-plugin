@@ -8,34 +8,43 @@ Parameters:
 Globals:
   Function:
     Layers:
-      - !Ref RuntimeDependenciesLayer
+      - !Ref AwsProtonCdkPluginRuntimeDependenciesLayer
     Runtime: nodejs14.x
     MemorySize: 128
     Timeout: 100
 
-# Resources declares the AWS resources that you want to include in the stack
-# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 Resources:
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: in src/handlers/example.ts
-  StartProvisioningFunction:
+  AwsProtonCdkPluginStartProvisioningFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
     Properties:
       Handler: dist/handlers/StartProvisioningHandler.StartProvisioningHandler
-      Description: A simple example includes a HTTP get method to get all items from a DynamoDB table.
+      Description: Aws Proton plugin to start provisioning CDK templates
       Environment:
         Variables:
-          CODE_BUILD_ID: !Ref CDKBuild
-          INPUT_BUCKET: !Ref CompiledTemplateBucket
+          CODE_BUILD_NAME: !Ref AwsProtonCdkPluginCodeBuildProject
+          CODE_BUILD_SOURCE_BUCKET_NAME: !Ref AwsProtonCdkPluginCodeBuildSourceBucket
+      Tags: 
+          AwsProtonPlugin: "CDK"
+          AwsProtonPluginFunction: "StartProvisioning"
 
-  CodeBuildRole:
+  # Shared layer with Lambda runtime dependencies
+  AwsProtonCdkPluginRuntimeDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    DeletionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Description: Runtime dependencies for Lambdas
+      ContentUri: ./
+      CompatibleRuntimes:
+        - nodejs14.x
+
+  AwsProtonCdkPluginCodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      Description: Creating service role in IAM for AWS CodeBuild
+      Description: Role assumed by CodeBuild for AWS Proton CDK Plugin
       AssumeRolePolicyDocument:
         Statement:
         - Action: sts:AssumeRole
@@ -43,128 +52,31 @@ Resources:
           Principal:
             Service: codebuild.amazonaws.com
       Path: /
-      RoleName: !Join
-        - '-'
-        - - !Ref 'AWS::StackName'
-          - CodeBuild
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
 
-  CodeBuildPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-        - Action:
-          - logs:CreateLogGroup
-          - logs:CreateLogStream
-          - logs:PutLogEvents
-          Effect: Allow
-          Resource: '*'
-      PolicyName: !Join
-        - '-'
-        -  - !Ref 'AWS::StackName'
-           - CodeBuildPolicy
-      Roles:
-      - !Ref 'CodeBuildRole'
-
-  CDKBuild:
+  AwsProtonCdkPluginCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties: 
       Artifacts:
         Type: NO_ARTIFACTS
-      TimeoutInMinutes: 20
+      Description: AWS Proton CodeBuild Plugin
+      TimeoutInMinutes: 60
+      ServiceRole: !Ref 'AwsProtonCdkPluginCodeBuildRole' 
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:5.0
         Type: LINUX_CONTAINER
-      Name: !Ref 'AWS::StackName'
-      ServiceRole: !Ref 'CodeBuildRole'
-      # ServiceRole: !Ref ProvisioningRole
-      # ServiceRole: arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
       Source:
         Type: NO_SOURCE
         BuildSpec:  >-
           version: 0.2
-          #env:
-            #variables:
-              # key: "value"
-              # key: "value"
-            #parameter-store:
-              # key: "value"
-              # key: "value"
-            #secrets-manager:
-              # key: secret-id:json-key:version-stage:version-id
-              # key: secret-id:json-key:version-stage:version-id
-            #exported-variables:
-              # - variable
-              # - variable
-            #git-credential-helper: yes
-          #batch:
-            #fast-fail: true
-            #build-list:
-            #build-matrix:
-            #build-graph:
-          phases:
-            #install:
-              #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
-              #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
-              #runtime-versions:
-                # name: version
-                # name: version
-              #commands:
-                # - command
-                # - command
-            #pre_build:
-              #commands:
-                # - command
-                # - command
-            build:
-              commands:
-                # - command
-                # - command
-            #post_build:
-              #commands:
-                # - command
-                # - command
-          #reports:
-            #report-name-or-arn:
-              #files:
-                # - location
-                # - location
-              #base-directory: location
-              #discard-paths: yes
-              #file-format: JunitXml | CucumberJson
-          #artifacts:
-            #files:
-              # - location
-              # - location
-            #name: $(date +%Y-%m-%d)
-            #discard-paths: yes
-            #base-directory: location
-          #cache:
-            #paths:
-              # - paths
-
-  # Shared layer with Lambda runtime dependencies
-  RuntimeDependenciesLayer:
-    Type: AWS::Serverless::LayerVersion
-    DeletionPolicy: Delete
-    Metadata:
-      BuildMethod: makefile
-    Properties:
-      LayerName: "proton-cdk-plugin-2-dependencies"
-      Description: Runtime dependencies for Lambdas
-      ContentUri: ./
-      CompatibleRuntimes:
-        - nodejs14.x
-
-  CompiledTemplateBucket:
+        
+  # Bucket that contains zip files that are used as input to CodeBuild      
+  AwsProtonCdkPluginCodeBuildSourceBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
-      BucketName: !Join
-        - '-'
-        -  - !Ref 'AWS::StackName'
-           - CompiledTemplateBucket
       AccessControl: Private
       LifecycleConfiguration:
         Rules:

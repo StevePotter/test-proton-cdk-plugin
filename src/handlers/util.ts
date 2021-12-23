@@ -52,11 +52,20 @@ export async function downloadAndExtract(url: string): Promise<BufferMap> {
   }, {})
 }
 
-interface BufferMap {
-  [name: string]: Buffer;
-}
-
 type ZipEntry = {
   name: string,
   contents: Buffer
 }
+
+export interface BufferMap {
+  [name: string]: Buffer;
+}
+
+export function createZip(files: BufferMap): Buffer {
+  const zip = new AdmZip()
+  for (const [fileName, data] of Object.entries(files)) {
+    zip.addFile(fileName, data)
+  }
+  return zip.toBuffer()
+}
+
