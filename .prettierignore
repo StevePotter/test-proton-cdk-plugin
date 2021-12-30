@@ -1,0 +1,8 @@
+*.properties
+node_modules
+dist
+package.json
+package-lock.json
+.config
+.npm
+.vscode/
