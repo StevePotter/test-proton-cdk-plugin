@@ -3,6 +3,8 @@ node_modules
 dist
 package.json
 package-lock.json
+jest.config.json
 .config
 .npm
 .vscode/
+.aws-sam
