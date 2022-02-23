@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 const codeBuildClient = new CodeBuild();
 const s3Client = new S3();
 
+type Handler = (input: StartProvisioningInput) => Promise<StartProvisioningOutput>
+
 /**
  * A simple example includes a HTTP get method.
  */
@@ -65,7 +67,7 @@ export const StartProvisioningHandler = async ({
             sourceTypeOverride: 'S3'
         })
         .promise();
-    console.log('Build started', r);
+    console.log('Build started:', r);
     const deploymentId = r.build!.arn!;
     console.log(`Deployment ID: ${deploymentId}`);
     return {

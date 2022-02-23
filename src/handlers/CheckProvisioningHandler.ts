@@ -30,7 +30,10 @@ export const CheckProvisioningHandler = async ({
     const buildStatus = response.builds[0].buildStatus;
     switch (buildStatus) {
         case 'SUCCEEDED':
-            throw new Error('');
+            return {
+                status: 'SUCCESS',
+                statusMessage: 'Build ${deploymentId} exited with status ${buildStatus}'
+            };
         case 'FAILED':
         case 'FAULT':
         case 'TIMED_OUT':

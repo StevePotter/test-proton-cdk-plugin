@@ -12,7 +12,18 @@ Globals:
     Runtime: nodejs14.x
     MemorySize: 128
     Timeout: 100
-
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: proton-test-cdk
+    Description: Aws codebuild
+    Author: user1
+    SpdxLicenseId: Apache-2.0
+    LicenseUrl: LICENSE.txt
+    ReadmeUrl: README.md
+    Labels: ['tests']
+    HomePageUrl: https://github.com/user1/proton-test-cdk-project
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://github.com/user1/proton-test-cdk-project
 Resources:
   StartProvisioningFunction:
     Type: AWS::Serverless::Function
@@ -25,7 +36,7 @@ Resources:
         Variables:
           CODE_BUILD_NAME: !Ref AwsProtonCdkPluginCodeBuildProject
           CODE_BUILD_SOURCE_BUCKET_NAME: !Ref CodeBuildSourceBucket
-      Tags: 
+      Tags:
           AwsProtonPlugin: "CDK"
           AwsProtonPluginFunction: "StartProvisioning"
 
@@ -58,12 +69,12 @@ Resources:
 
   AwsProtonCdkPluginCodeBuildProject:
     Type: AWS::CodeBuild::Project
-    Properties: 
+    Properties:
       Artifacts:
         Type: NO_ARTIFACTS
       Description: AWS Proton CodeBuild Plugin
       TimeoutInMinutes: 60
-      ServiceRole: !Ref 'CodeBuildRole' 
+      ServiceRole: !Ref 'CodeBuildRole'
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:5.0
@@ -72,8 +83,11 @@ Resources:
         Type: NO_SOURCE
         BuildSpec:  >-
           version: 0.2
-        
-  # Bucket that contains zip files that are used as input to CodeBuild      
+      Tags:
+        - Key: AwsProtonPlugin
+          Value: CDK
+
+  # Bucket that contains zip files that are used as input to CodeBuild
   CodeBuildSourceBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -83,5 +97,8 @@ Resources:
         Rules:
           - Id: DeleteOldObjects
             Status: Enabled
-            ExpirationInDays: 2
+            ExpirationInDays: 1
             NoncurrentVersionExpirationInDays: 1
+      Tags:
+        - Key: AwsProtonPlugin
+          Value: CDK
