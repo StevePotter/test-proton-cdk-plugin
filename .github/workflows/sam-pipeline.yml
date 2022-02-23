@@ -11,10 +11,10 @@ jobs:
         with:
           python-version: "3.8"
       - uses: aws-actions/setup-sam@v1
-      - run: sam build --use-container
+      - run: sam build
       - name: Archive SAM artifacts
         uses: actions/upload-artifact@v2
         with:
           name: sam-arts
           path: |
-            /tmp/samcli/artifacts
+            .aws-sam/build
